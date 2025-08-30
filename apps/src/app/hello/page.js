@@ -7,6 +7,7 @@ import Pagination from '@/components/Pagination'
 import DataInfo from '@/components/DataInfo'
 import ChartA from '@/components/ChartA'
 import ChartB from '@/components/ChartB'
+import HeatmapChart from '@/components/HeatmapChart'
 
 export default function HelloPage() {
   const [currentPage, setCurrentPage] = useState(1)
@@ -43,6 +44,9 @@ export default function HelloPage() {
           {/* Chart.jsグラフ */}
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-6 text-center">データ分析グラフ</h2>
+
+            {/* ヒートマップ */}
+            <HeatmapChart />
 
             {/* グラフA・グラフBを横並びに配置 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

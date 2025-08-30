@@ -125,6 +125,57 @@ export const aggregateByDateAndPrimaryCategory = (data = sampleLogData) => {
   return result
 }
 
+// ヒートマップ用のデータ処理関数
+export const formatHeatmapData = (data = sampleLogData) => {
+  const primaryCategories = ['分類A', '分類B', '分類C', '分類D']
+  const dateAndCategoryData = aggregateByDateAndPrimaryCategory(data)
+  const dates = Object.keys(dateAndCategoryData).sort((a, b) => a.localeCompare(b))
+
+  const heatmapData = []
+  let maxValue = 0
+
+  dates.forEach((date, dateIndex) => {
+    primaryCategories.forEach((category, categoryIndex) => {
+      const count = dateAndCategoryData[date]?.[category] || 0
+      maxValue = Math.max(maxValue, count)
+      heatmapData.push({
+        x: dateIndex,
+        y: categoryIndex,
+        v: count,
+      })
+    })
+  })
+
+  return {
+    labels: {
+      x: dates,
+      y: primaryCategories,
+    },
+    datasets: [
+      {
+        label: 'ログ件数',
+        data: heatmapData,
+        backgroundColor: function (context) {
+          // context.rawまたはdataIndexから値を取得
+          const dataItem = context.raw || context.dataset.data[context.dataIndex]
+          const value = dataItem?.v
+          if (value === undefined || value === null || value === 0) {
+            return 'rgba(240, 240, 240, 0.8)'
+          }
+          // 最大値を5として固定（サンプルデータの特性を考慮）
+          const normalizedValue = Math.min(value / 5, 1)
+          return `rgba(54, 162, 235, ${0.2 + normalizedValue * 0.8})`
+        },
+        borderColor: 'rgba(255, 255, 255, 0.8)',
+        borderWidth: 1,
+        width: ({ chart }) => chart.chartArea?.width / dates.length - 1,
+        height: ({ chart }) => chart.chartArea?.height / primaryCategories.length - 1,
+      },
+    ],
+    maxValue,
+  }
+}
+
 // chart.js用のデータ形式に変換するヘルパー関数
 export const formatForChartJS = {
   // 日別件数用（棒グラフ）- グラフA用
