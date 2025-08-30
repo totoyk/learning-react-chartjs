@@ -253,6 +253,62 @@ export const formatForChartJS = {
       ],
     }
   },
+
+  // 複合グラフ用（棒グラフ+折れ線グラフ）- グラフA用
+  combinedDailyChart: () => {
+    const aggregated = aggregateByDate()
+    const dateAndCategoryData = aggregateByDateAndPrimaryCategory()
+    const primaryCategories = ['分類A', '分類B', '分類C', '分類D']
+
+    // 日別データセットを準備
+    const datasets = [
+      // 総件数の棒グラフ
+      {
+        label: '総発生件数',
+        data: aggregated.map(item => item.count),
+        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1,
+        type: 'bar',
+        yAxisID: 'y',
+        // ツールチップ用のカスタムデータ
+        primaryCategoryDetails: aggregated.map(item => {
+          const date = item.date
+          return dateAndCategoryData[date] || {}
+        }),
+      },
+    ]
+
+    // 各primaryCategory別の折れ線グラフを追加
+    const colors = [
+      'rgba(255, 99, 132, 1)', // 分類A - 赤
+      'rgba(75, 192, 192, 1)', // 分類B - 緑
+      'rgba(255, 205, 86, 1)', // 分類C - 黄
+      'rgba(153, 102, 255, 1)', // 分類D - 紫
+    ]
+
+    primaryCategories.forEach((category, index) => {
+      datasets.push({
+        label: category,
+        data: aggregated.map(item => {
+          const date = item.date
+          return dateAndCategoryData[date]?.[category] || 0
+        }),
+        borderColor: colors[index],
+        backgroundColor: colors[index].replace('1)', '0.1)'),
+        type: 'line',
+        yAxisID: 'y1',
+        tension: 0.1,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      })
+    })
+
+    return {
+      labels: aggregated.map(item => item.date),
+      datasets: datasets,
+    }
+  },
 }
 
 // 使用例をコメントで記載
