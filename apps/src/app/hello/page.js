@@ -8,6 +8,7 @@ import DataInfo from '@/components/DataInfo'
 import ChartA from '@/components/ChartA'
 import ChartB from '@/components/ChartB'
 import HeatmapChart from '@/components/HeatmapChart'
+import StackedAreaChart from '@/components/StackedAreaChart'
 
 export default function HelloPage() {
   const [currentPage, setCurrentPage] = useState(1)
@@ -47,6 +48,9 @@ export default function HelloPage() {
 
             {/* ヒートマップ */}
             <HeatmapChart />
+
+            {/* 積み上げエリアチャート */}
+            <StackedAreaChart />
 
             {/* グラフA・グラフBを横並びに配置 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

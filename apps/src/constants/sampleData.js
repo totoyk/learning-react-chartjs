@@ -309,6 +309,39 @@ export const formatForChartJS = {
       datasets: datasets,
     }
   },
+
+  // 積み上げエリアチャート用（primaryCategories別の日別ログ件数）
+  stackedAreaChart: () => {
+    const aggregated = aggregateByDate()
+    const dateAndCategoryData = aggregateByDateAndPrimaryCategory()
+    const primaryCategories = ['分類A', '分類B', '分類C', '分類D']
+
+    // 各primaryCategory別のデータセットを作成
+    const colors = [
+      'rgba(255, 99, 132, 0.8)', // 分類A - 赤
+      'rgba(75, 192, 192, 0.8)', // 分類B - 緑
+      'rgba(255, 205, 86, 0.8)', // 分類C - 黄
+      'rgba(153, 102, 255, 0.8)', // 分類D - 紫
+    ]
+
+    const datasets = primaryCategories.map((category, index) => ({
+      label: category,
+      data: aggregated.map(item => {
+        const date = item.date
+        return dateAndCategoryData[date]?.[category] || 0
+      }),
+      backgroundColor: colors[index],
+      borderColor: colors[index].replace('0.8)', '1)'),
+      borderWidth: 1,
+      fill: true,
+      tension: 0.1,
+    }))
+
+    return {
+      labels: aggregated.map(item => item.date),
+      datasets: datasets,
+    }
+  },
 }
 
 // 使用例をコメントで記載
