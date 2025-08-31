@@ -213,15 +213,17 @@ export const formatForChartJS = {
         {
           label: '総発生件数',
           data: aggregated.map(item => item.count),
-          backgroundColor: aggregated.map(item => 
-            item.count >= threshold 
-              ? 'rgba(255, 99, 132, 0.8)'  // 基準線以上は赤
-              : 'rgba(54, 162, 235, 0.8)'  // 基準線未満は青
+          backgroundColor: aggregated.map(
+            item =>
+              item.count >= threshold
+                ? 'rgba(255, 99, 132, 0.8)' // 基準線以上は赤
+                : 'rgba(54, 162, 235, 0.8)' // 基準線未満は青
           ),
-          borderColor: aggregated.map(item => 
-            item.count >= threshold 
-              ? 'rgba(255, 99, 132, 1)'    // 基準線以上は赤
-              : 'rgba(54, 162, 235, 1)'    // 基準線未満は青
+          borderColor: aggregated.map(
+            item =>
+              item.count >= threshold
+                ? 'rgba(255, 99, 132, 1)' // 基準線以上は赤
+                : 'rgba(54, 162, 235, 1)' // 基準線未満は青
           ),
           borderWidth: 1,
           // カスタムデータとしてprimaryCategory別の詳細を追加

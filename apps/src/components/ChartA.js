@@ -30,7 +30,7 @@ export default function ChartA() {
             const currentValue = context[0].parsed.y
 
             let details = []
-            
+
             // 基準線との比較情報を追加
             if (currentValue >= threshold) {
               details.push(`基準線を${currentValue - threshold}件超過`)
