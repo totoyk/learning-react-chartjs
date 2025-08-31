@@ -1,89 +1,88 @@
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js'
-import { Chart } from 'react-chartjs-2'
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'
+import annotationPlugin from 'chartjs-plugin-annotation'
+import { Bar } from 'react-chartjs-2'
 import { formatForChartJS, aggregateByDateAndPrimaryCategory } from '@/constants/sampleData'
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend)
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, annotationPlugin)
 
-// グラフA: 日別ログ件数の縦棒グラフ + primaryCategories別の折れ線グラフ（複合グラフ）
+// グラフA: 日別ログ件数の縦棒グラフ（基準線付き、primaryCategories別詳細をツールチップで表示）
 export default function ChartA() {
-  const chartData = formatForChartJS.combinedDailyChart()
+  const threshold = 10 // 基準線の値
+  const chartData = formatForChartJS.dailyCountBarChartWithThreshold(threshold)
   const dateAndCategoryData = aggregateByDateAndPrimaryCategory()
 
   const options = {
     responsive: true,
-    interaction: {
-      mode: 'index',
-      intersect: false,
-    },
     plugins: {
       legend: {
         position: 'top',
       },
       title: {
         display: true,
-        text: '日別ログ発生件数（総数と分類別）',
+        text: `日別ログ発生件数（基準線: ${threshold}件）`,
       },
       tooltip: {
         callbacks: {
           afterBody: function (context) {
-            // 棒グラフ（総件数）のツールチップでのみ詳細を表示
-            const barDataIndex = context.findIndex(item => item.dataset.type === 'bar')
-            if (barDataIndex === -1) return []
-
-            const dataIndex = context[barDataIndex].dataIndex
+            const dataIndex = context[0].dataIndex
             const date = chartData.labels[dataIndex]
             const categoryDetails = dateAndCategoryData[date]
+            const currentValue = context[0].parsed.y
 
-            if (!categoryDetails) return []
+            let details = []
+            
+            // 基準線との比較情報を追加
+            if (currentValue >= threshold) {
+              details.push(`基準線を${currentValue - threshold}件超過`)
+            } else {
+              details.push(`基準線まであと${threshold - currentValue}件`)
+            }
 
-            const details = []
-            Object.entries(categoryDetails).forEach(([category, count]) => {
-              details.push(`${category}: ${count}件`)
-            })
+            if (categoryDetails) {
+              details.push('') // 空行
+              details.push('分類別詳細:')
+              Object.entries(categoryDetails).forEach(([category, count]) => {
+                details.push(`${category}: ${count}件`)
+              })
+            }
 
-            return details.length > 0 ? ['', '分類別詳細:', ...details] : []
+            return details
+          },
+        },
+      },
+      annotation: {
+        annotations: {
+          threshold: {
+            type: 'line',
+            yMin: threshold,
+            yMax: threshold,
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            label: {
+              display: true,
+              content: `基準線 (${threshold}件)`,
+              position: 'end',
+              backgroundColor: 'rgba(255, 99, 132, 0.8)',
+              color: 'white',
+              padding: 4,
+            },
           },
         },
       },
     },
     scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: '件数',
+        },
+      },
       x: {
         title: {
           display: true,
           text: '日付',
-        },
-      },
-      y: {
-        type: 'linear',
-        display: true,
-        position: 'left',
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: '総件数',
-        },
-      },
-      y1: {
-        type: 'linear',
-        display: true,
-        position: 'right',
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: '分類別件数',
-        },
-        grid: {
-          drawOnChartArea: false,
         },
       },
     },
@@ -93,7 +92,7 @@ export default function ChartA() {
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg">
       <div style={{ height: '400px' }}>
-        <Chart type="bar" data={chartData} options={options} />
+        <Bar data={chartData} options={options} />
       </div>
     </div>
   )
